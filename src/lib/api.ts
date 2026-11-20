@@ -79,6 +79,24 @@ export async function registerFetch(
 	return data;
 }
 
+export async function guestLoginFetch(): Promise<{ user: User }> {
+	const response = await fetch(`${API_URL}/auth/guest`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		credentials: 'include'
+	});
+
+	if (!response.ok) {
+		const errorData = (await response.json().catch(() => null)) as
+			| { message?: string; error?: string }
+			| null;
+		throw new Error(errorData?.error || errorData?.message || 'Erro ao entrar como convidado');
+	}
+
+	const data = (await response.json()) as { user: User };
+	return data;
+}
+
 export async function healthAPI(): Promise<{ message: string }> {
 	const res = await fetch(`${API_URL}/health`, {
 		method: 'GET'

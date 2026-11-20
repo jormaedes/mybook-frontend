@@ -14,6 +14,7 @@ function LoginForm() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const login = useAuthStore((s) => s.login);
+	const loginAsGuest = useAuthStore((s) => s.loginAsGuest);
 	const logout = useAuthStore((s) => s.logout);
 	const user = useAuthStore((s) => s.user);
 	const status = useAuthStore((s) => s.status);
@@ -52,6 +53,22 @@ function LoginForm() {
 		}
 	}
 
+	async function handleGuestLogin() {
+		setErrorMessage(null);
+		setIsSubmitting(true);
+		try {
+			await loginAsGuest();
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				setErrorMessage(error.message);
+			} else {
+				setErrorMessage('Erro ao entrar como convidado');
+			}
+		} finally {
+			setIsSubmitting(false);
+		}
+	}
+
 	if (status === 'authenticated' && user) {
 		return (
 			<div>
@@ -66,6 +83,11 @@ function LoginForm() {
 					/>
 				)}
 				<p>{user.username} ({user.email}) Autenticado</p>
+				{user.isGuest && (
+					<p style={{ color: '#666', fontSize: '0.9rem' }}>
+						Conta de demonstração (Convidado) - Não é permitido alterar o username nem a palavra-passe.
+					</p>
+				)}
 				{user.githubId && <small>Conta autenticada com GitHub</small>}
 				<div style={{ marginTop: '1rem' }}>
 					<button type="button" onClick={() => logout()}>
@@ -117,13 +139,15 @@ function LoginForm() {
 				</div>
 
 				<div>
-					<button type="button" onClick={redirectToGithub}>
+					<button type="button" onClick={redirectToGithub} disabled={isSubmitting}>
 						Entrar com Github
 					</button>
 				</div>
 
 				<div>
-					<button type="button">Entrar como convidado</button>
+					<button type="button" onClick={handleGuestLogin} disabled={isSubmitting}>
+						{isSubmitting ? 'A entrar...' : 'Entrar como convidado'}
+					</button>
 				</div>
 
 				<div>

@@ -8,5 +8,6 @@ export interface User {
 	coverPublicId: string | null;
 	bio: string | null;
 	githubId?: string | null;
+	isGuest?: boolean;
 	createdAt: Date;
 }

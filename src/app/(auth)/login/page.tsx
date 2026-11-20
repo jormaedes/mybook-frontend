@@ -2,6 +2,7 @@
 
 import { useAuthStore } from "@/components/stores/auth";
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 
 export default function LoginPage() {
 	const [email, setEmail] = useState('');
@@ -12,7 +13,6 @@ export default function LoginPage() {
 	const login = useAuthStore((s) => s.login);
 	const user = useAuthStore((s) => s.user);
 	const status = useAuthStore((s) => s.status);
-	const logout = useAuthStore((s) => s.logout);
 
 	async function handleSubmit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -47,13 +47,14 @@ export default function LoginPage() {
 		return (
 			<div>
 				<p>{user.email} Autenticado</p>
-				<button onClick={() => logout()}>logout</button>
 			</div>
 		);
 	}
 
 	return (
 		<div>
+			<h1>Entrar</h1>
+
 			{errorMessage && (
 				<div style={{ color: 'red', marginBottom: '1rem' }}>
 					{errorMessage}
@@ -92,6 +93,12 @@ export default function LoginPage() {
 
 				<div>
 					<button type="button">Login with Github</button>
+				</div>
+
+				<div>
+					<p>
+						Não tem uma conta? <Link href="/register">Criar conta</Link>
+					</p>
 				</div>
 			</form>
 		</div>

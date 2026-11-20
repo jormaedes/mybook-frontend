@@ -1,15 +1,17 @@
 'use client';
 
+import { useAuthStore } from "@/components/stores/auth";
 import { loginFetch, healthAPI } from "@/lib/api";
 import { useState } from "react";
 
 export default function LoginPage() {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
+	const login = useAuthStore((s) => s.login)
 
 	async function handleLogin() {
-		const data = await loginFetch(email, password);
-		console.log(data);
+		const data = await healthAPI();
+		console.log(data) 
 	}
 
 	return (

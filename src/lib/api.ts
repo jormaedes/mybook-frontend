@@ -2,6 +2,16 @@ import type { User } from '@/types/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+export const GITHUB_AUTH_URL = `${API_URL}/auth/github`;
+
+export function redirectToGithub(): void {
+	if (typeof window !== 'undefined') {
+		// Redirecionamento completo do browser para o endpoint OAuth do backend
+		// eslint-disable-next-line @next/next/no-location-assign-relative-destination
+		window.location.href = GITHUB_AUTH_URL;
+	}
+}
+
 export async function loginFetch(email: string, password: string): Promise<{ user: User }> {
 	const response = await fetch(`${API_URL}/auth/login`, {
 		method: 'POST',

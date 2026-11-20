@@ -1,18 +1,27 @@
 'use client';
 
 import { useAuthStore } from "@/components/stores/auth";
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { redirectToGithub } from "@/lib/api";
 
-export default function LoginPage() {
+function LoginForm() {
+	const searchParams = useSearchParams();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const login = useAuthStore((s) => s.login);
+	const logout = useAuthStore((s) => s.logout);
 	const user = useAuthStore((s) => s.user);
 	const status = useAuthStore((s) => s.status);
+
+	const errorParam = searchParams.get('error');
+	const displayedError =
+		errorMessage ??
+		(errorParam === 'github' ? 'Falha na autenticação com o GitHub. Por favor, tente novamente.' : null);
 
 	async function handleSubmit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -46,7 +55,23 @@ export default function LoginPage() {
 	if (status === 'authenticated' && user) {
 		return (
 			<div>
-				<p>{user.email} Autenticado</p>
+				{user.avatarUrl && (
+					/* eslint-disable-next-line @next/next/no-img-element */
+					<img
+						src={user.avatarUrl}
+						alt={user.username}
+						width={64}
+						height={64}
+						style={{ borderRadius: '50%' }}
+					/>
+				)}
+				<p>{user.username} ({user.email}) Autenticado</p>
+				{user.githubId && <small>Conta autenticada com GitHub</small>}
+				<div style={{ marginTop: '1rem' }}>
+					<button type="button" onClick={() => logout()}>
+						Terminar sessão
+					</button>
+				</div>
 			</div>
 		);
 	}
@@ -55,9 +80,9 @@ export default function LoginPage() {
 		<div>
 			<h1>Entrar</h1>
 
-			{errorMessage && (
+			{displayedError && (
 				<div style={{ color: 'red', marginBottom: '1rem' }}>
-					{errorMessage}
+					{displayedError}
 				</div>
 			)}
 
@@ -92,7 +117,13 @@ export default function LoginPage() {
 				</div>
 
 				<div>
-					<button type="button">Login with Github</button>
+					<button type="button" onClick={redirectToGithub}>
+						Entrar com Github
+					</button>
+				</div>
+
+				<div>
+					<button type="button">Entrar como convidado</button>
 				</div>
 
 				<div>
@@ -102,5 +133,13 @@ export default function LoginPage() {
 				</div>
 			</form>
 		</div>
+	);
+}
+
+export default function LoginPage() {
+	return (
+		<Suspense fallback={<div>A carregar...</div>}>
+			<LoginForm />
+		</Suspense>
 	);
 }

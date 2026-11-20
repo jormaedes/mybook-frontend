@@ -7,5 +7,6 @@ export interface User {
 	coverUrl: string | null;
 	coverPublicId: string | null;
 	bio: string | null;
+	githubId?: string | null;
 	createdAt: Date;
 }

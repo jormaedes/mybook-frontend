@@ -3,6 +3,7 @@
 import { useAuthStore } from "@/components/stores/auth";
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { redirectToGithub } from "@/lib/api";
 
 export default function RegisterPage() {
 	const [username, setUsername] = useState('');
@@ -13,6 +14,7 @@ export default function RegisterPage() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const register = useAuthStore((s) => s.register);
+	const logout = useAuthStore((s) => s.logout);
 	const user = useAuthStore((s) => s.user);
 	const status = useAuthStore((s) => s.status);
 
@@ -60,7 +62,23 @@ export default function RegisterPage() {
 	if (status === 'authenticated' && user) {
 		return (
 			<div>
+				{user.avatarUrl && (
+					/* eslint-disable-next-line @next/next/no-img-element */
+					<img
+						src={user.avatarUrl}
+						alt={user.username}
+						width={64}
+						height={64}
+						style={{ borderRadius: '50%' }}
+					/>
+				)}
 				<p>{user.username} ({user.email}) Autenticado</p>
+				{user.githubId && <small>Conta autenticada com GitHub</small>}
+				<div style={{ marginTop: '1rem' }}>
+					<button type="button" onClick={() => logout()}>
+						Terminar sessão
+					</button>
+				</div>
 			</div>
 		);
 	}
@@ -129,6 +147,12 @@ export default function RegisterPage() {
 				<div>
 					<button type="submit" disabled={isSubmitting}>
 						{isSubmitting ? 'A registar...' : 'Registar'}
+					</button>
+				</div>
+
+				<div>
+					<button type="button" onClick={redirectToGithub}>
+						Registar com Github
 					</button>
 				</div>
 

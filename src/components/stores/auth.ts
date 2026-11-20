@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type { User } from '../../types/types';
-import { getMe, logoutAPI, loginFetch } from '@/lib/api'
-
+import { getMe, logoutAPI, loginFetch } from '@/lib/api';
 
 interface AuthState {
 	user: User | null;
@@ -13,24 +12,28 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>()((set) => {
-
 	return {
 		user: null,
 		status: 'loading',
 
 		login: async (email: string, password: string) => {
 			try {
+				set({ status: 'loading'});
 				const res = await loginFetch(email, password);
-				set({ user: res, status: 'authenticated' });
-				console.log(res);
+				set({ user: res.user, status: 'authenticated' });
 			} catch (error) {
 				set({ status: 'unauthenticated' });
+				throw error;
 			}
 		},
 
 		logout: async () => {
-			await logoutAPI();
-			set({ user: null, status: 'unauthenticated' });
+			try {
+				set({ status: 'loading'});
+				await logoutAPI();
+			} finally {
+				set({ user: null, status: 'unauthenticated' });
+			}
 		},
 
 		setUser: (user) => {
@@ -39,11 +42,12 @@ export const useAuthStore = create<AuthState>()((set) => {
 
 		init: async () => {
 			try {
-				const user = await getMe();
-				set({ user: user, status: 'authenticated' });
-			} catch (error) {
-				set({ status: 'unauthenticated' });
+				set({ status: 'loading'});
+				const res = await getMe();
+				set({ user: res.user, status: 'authenticated' });
+			} catch {
+				set({ user: null, status: 'unauthenticated' });
 			}
 		}
-	}
+	};
 });
